@@ -6,5 +6,6 @@ class DataLoadEvent extends HomeEvent {}
 
 class SetIpAddressEvent extends HomeEvent {
   String ipAddress;
-  SetIpAddressEvent(this.ipAddress);
+  String portAddress;
+  SetIpAddressEvent(this.ipAddress,this.portAddress);
 }

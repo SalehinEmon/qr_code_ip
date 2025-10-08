@@ -7,7 +7,8 @@ part 'home_event.dart';
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  String ipAddress = '5125';
+  String ipAddress = '';
+  String portAddress = "5125";
   List<DropdownMenuItem> networkList = [];
   HomeBloc() : super(HomeInitial()) {
     on<DataLoadEvent>(onDataLoadEvent);
@@ -15,6 +16,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
   onSetIpAddressEvent(SetIpAddressEvent event, emit) {
     ipAddress = event.ipAddress;
+    portAddress = event.portAddress;
+    emit(DataChangedState());
   }
 
   onDataLoadEvent(DataLoadEvent event, emit) async {

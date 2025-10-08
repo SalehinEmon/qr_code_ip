@@ -15,6 +15,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   TextEditingController portAddressCtlr = TextEditingController(text: "5125");
+  String ipAddress = "";
 
   @override
   void initState() {
@@ -26,7 +27,9 @@ class _HomeViewState extends State<HomeView> {
     return BlocProvider(
       create: (context) => HomeBloc()..add(DataLoadEvent()),
       child: BlocConsumer<HomeBloc, HomeState>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          ipAddress = context.read<HomeBloc>().ipAddress;
+        },
         builder: (context, state) {
           return Scaffold(
             body: state is DataLoadingState
@@ -42,11 +45,13 @@ class _HomeViewState extends State<HomeView> {
                         DropdownButton(
                           items: context.watch<HomeBloc>().networkList,
                           onChanged: (value) {
-                            context
-                                .read<HomeBloc>()
-                                .add(SetIpAddressEvent(value));
+                            ipAddress = value;
+                            context.read<HomeBloc>().add(
+                                  SetIpAddressEvent(
+                                      value, portAddressCtlr.text),
+                                );
                           },
-                          value: null,
+                          value: context.read<HomeBloc>().ipAddress,
                         ),
                         SizedBox(
                           width: 250,
@@ -55,14 +60,26 @@ class _HomeViewState extends State<HomeView> {
                           ),
                         ),
                         QrImageView(
-                          data:
-                              'http://${context.watch<HomeBloc>().ipAddress}/',
+                          data: genUrl(context.watch<HomeBloc>().ipAddress,
+                              context.watch<HomeBloc>().portAddress),
                           version: QrVersions.auto,
                           size: 150,
                           gapless: false,
                         ),
-                        Text(context.watch<HomeBloc>().ipAddress),
-                
+                        Text(
+                          genUrl(context.watch<HomeBloc>().ipAddress,
+                              context.watch<HomeBloc>().portAddress),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<HomeBloc>().add(SetIpAddressEvent(
+                                ipAddress, portAddressCtlr.text));
+                          },
+                          child: const Text("Generate"),
+                        )
                       ],
                     ),
                   ),
@@ -70,5 +87,12 @@ class _HomeViewState extends State<HomeView> {
         },
       ),
     );
+  }
+
+  String genUrl(String ipAddress, String portAddress) {
+    if (portAddress.isEmpty) {
+      return 'http://$ipAddress/';
+    }
+    return 'http://$ipAddress:$portAddress/';
   }
 }
